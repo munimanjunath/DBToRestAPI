@@ -45,7 +45,7 @@ public void init() {
      Statement stmt = conn.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE,
  		    ResultSet.CONCUR_READ_ONLY);
 	   ResultSet rs;
-	   String dbQueryString = "SELECT queryname,query  FROM api_queries" ; 
+	   String dbQueryString = "SELECT *  FROM api_queries" ; 
 	 
    
     System.out.println(dbQueryString);
@@ -54,12 +54,10 @@ public void init() {
     
   while ( rs.next() ) {
 	  
-	  String queryName = rs.getString(1);
-	  String query  = rs.getString(2);
+	  String queryAPI = rs.getString("");
+	  String query  = rs.getString("");
 	  
-	  System.out.println(queryName+":    "+query );
-	  
-      queryMap.put(queryName, query)	   ;
+      queryMap.put(queryAPI, query)	   ;
   
 }
   
@@ -136,7 +134,7 @@ public void init() {
       
       String pathInfo = request.getPathInfo() ;
       String[] pathArr = pathInfo.split("/");
-      System.out.println("0:"+pathArr[0]+"   1:"+pathArr[1]+" 2:"+pathArr[2]) ;
+      System.out.println("0:"+pathArr[0]+"   1:"+pathArr[1]) ;
       for(String c : pathArr) {
     	  System.out.println(c);
       }
@@ -144,69 +142,21 @@ public void init() {
        Map<String,String[]> parameterMap = request.getParameterMap();
       String condition = parameterMap.get("condition")!=null && parameterMap.get("condition").length > 0 ? parameterMap.get("condition")[0] : null ;
       
-      if(condition != null && condition.length() > 1 ) {
-    	  condition = condition.replace("$eq", "=");
-    	  
-    	  // check for sql injections
-//    	  if(condition.toLowerCase().indexOf("drop ") > -1 || 
-//    			  condition.toLowerCase().indexOf("insert ") > -1 || 
-//    			  condition.toLowerCase().indexOf("update ") > -1 || 
-//    			  condition.toLowerCase().indexOf("delete ") > -1 || 
-//    			  condition.toLowerCase().indexOf("truncate ") > -1 ||
-//    			  condition.toLowerCase().indexOf("trunc ") > -1 
-//    			  ) {
-//    		  response.setStatus(500,"Possible sql injection in the input");
-//    		  out.print("{\"ErrorCode\" : \"possible sql injection\"}");
-//              out.flush();
-//              return ;
-//    		  
-//    	  }
-    	  
-    	  
-    	  
-      }
       
+      String tableName = pathArr[1] ;
       
-      
-    	  
-     
-      String tableName =  pathArr[2] ;
       
       try {
           Connection conn = ds.getConnection() ;
           Statement stmt = conn.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE,
         		    ResultSet.CONCUR_READ_ONLY);
           ResultSet rs;
+          String dbQueryString = "SELECT *  FROM "+tableName ; 
           
+          if( condition!= null )
+        	  dbQueryString += " where "+ condition ;
           
-          String dbQueryString = null ;
-          
-          if(pathArr[1].equals("table") ) {
-        	  
-          
-	          dbQueryString = "SELECT *  FROM "+tableName ; 
-	          
-	          if( condition!= null )
-	        	  dbQueryString += " where "+ condition ;
-	          
-	          System.out.println(dbQueryString);
-          
-          
-          
-          }else  if(pathArr[1].equals("query") )  {
-        	  
-        	  dbQueryString =  queryMap.get(pathArr[2]);
-	          System.out.println(dbQueryString);
-
-        	  
-          }else {
-        	  
-        	  response.setStatus(500,"Invalid Select Type");
-    		  out.print("{\"ErrorMessage\" : \"Invalid Select Type. Select type should be table/query \"}");
-              out.flush();
-        	  
-        	  
-          }
+          System.out.println(dbQueryString);
 
           rs = stmt.executeQuery(dbQueryString);
           
@@ -277,8 +227,6 @@ public void init() {
           System.err.println("Got an exception! ");
           System.err.println(e.getMessage());
       }
-      
-      
       
      // System.out.println(request.get)
 
