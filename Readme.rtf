@@ -1,1 +1,56 @@
-{\rtf1}
+This is a generic API  to access any jdbc compliance Relational Database  through REST. ( REST style dynamic api for database )
+
+Configure jdbc driver on tomcat server  and deploy the war file  you have all the get access  for the db tables instantly.
+
+Examples:
+
+http://localhost:8080/DBToRestAPI/table/customers    -- get the customers table information
+
+http://localhost:8080/DBToRestAPI/table/customers?condition=customer_id  >=  307   --   get the customers whose customer_id >= 307
+( you can add and single conditions   for the query parameter it will be passed as is )
+
+
+For complex queires:  
+
+1. Create a  db table with the name  api_queries as below structure
+
+Name      Null Type           
+--------- ---- -------------- 
+ID             NUMBER(38)     
+QUERYNAME      VARCHAR2(500)  
+QUERY          VARCHAR2(4000) 
+
+
+
+--------------------------------------------------------
+--  DDL for Table API_QUERIES
+--------------------------------------------------------
+
+  CREATE TABLE "OT"."API_QUERIES" 
+   (	"ID" NUMBER(*,0), 
+	"QUERYNAME" VARCHAR2(500 BYTE), 
+	"QUERY" VARCHAR2(4000 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+REM INSERTING into OT.API_QUERIES
+SET DEFINE OFF;
+
+Example insert :
+
+
+Insert into OT.API_QUERIES (ID,QUERYNAME,QUERY) values (1,'orderswith100','select a.*,b.item_id,product_id,quantity,unit_price from orders a ,order_items b where a.order_id=b.order_id
+and a.order_id={{OrderId}}');
+
+
+
+Example API structure :
+
+http://localhost:8080/DBToRestAPI/query/orderswith100?OrderId=2
+
+
+
